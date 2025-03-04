@@ -1,0 +1,41 @@
+.tile {
+  border: 1px solid #000000aa;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.start {
+  background: #28a745;
+}
+
+.target {
+  background: #dc3545;
+}
+
+.unvisited {
+  background: white;
+}
+
+.visited {
+  background: #007bffaa;
+}
+
+@keyframes unvisited-visited {
+  from {background-color: white;}
+  to {background-color: blue;}
+}
+
+.wall {
+  background: #343a40;
+}
+
+.path {
+  background: #ffc107;
+}
+
+
+@keyframes visited-path {
+  from {background-color: white;}
+  50% {background-color: blue;}
+  to {background-color: green;}
+}
