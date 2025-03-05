@@ -26,6 +26,10 @@
   gap: 1rem;
 }
 
+header {
+  padding-inline: 1rem;
+}
+
 button {
   padding: 0.6rem;
   border: none;

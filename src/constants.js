@@ -1,4 +1,4 @@
-import Node from "./NodeClass.js"
+import Node from "./helpers/NodeClass"
 
 export const di = [1, 0, -1, 0]
 export const dj = [0, 1, 0, -1]
