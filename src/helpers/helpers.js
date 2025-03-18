@@ -37,3 +37,6 @@ export const clearEntireBoard = (matrix) => {
   return newMatrix
 }
 
+export const getDistance = (curr, target) => {
+  return Math.abs(target.i - curr.i) + Math.abs(target.j - curr.j);
+}

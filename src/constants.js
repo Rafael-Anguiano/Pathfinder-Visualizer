@@ -1,7 +1,7 @@
 import Node from "./helpers/NodeClass"
 
-export const di = [1, 0, -1, 0]
-export const dj = [0, 1, 0, -1]
+export const di = [0, 1, 0, -1]
+export const dj = [1, 0, -1, 0]
 
 export const Status = {
   UNVISITED: 0,
@@ -12,11 +12,10 @@ export const Status = {
   PATH: 5,
 };
 
-export const Movement = {
-  NOTHING: 0,
-  STARTING: 1,
-  TARGET: 2,
-  WALL: 3,
+export const Search = {
+  NONE: 0,
+  BFS: 1,
+  ASTAR: 2,
 }
 
 const createMatrixOfNodes = (rows, columns) => {

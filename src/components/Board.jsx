@@ -1,24 +1,72 @@
 import { useState } from 'react'
-import { clearEntireBoard, clearVisited, copyBoard } from '../helpers/helpers.js';
-import { di, dj, base, Status } from '../constants.js'
+import { clearEntireBoard, clearVisited, copyBoard, getDistance } from '../helpers/helpers.js';
+import { di, dj, base, Status, Search } from '../constants.js'
 import Tile from './Tile';
 
 const Board = () => {
   const [board, setBoard] = useState(base)
-  const [start, setStarting] = useState()
+  const [state, setState] = useState(Search.NONE)
   const [target, setTarget] = useState()
-  const [isDrawing, setDrawingMode] = useState(false)
-  const [state, setState] = useState(false)
+  const [start, setStarting] = useState()
   const [holdingMouse, setHolding] = useState(false)
+  const [isDrawing, setDrawingMode] = useState(false)
+
+  const astar = () => {
+    setState(Search.ASTAR)
+    let newBoard = clearVisited(board);
+    let visited = new Set();
+    let found = false
+    const q = [{ i: start.i, j: start.j, q: 0, h: getDistance(start, target) }]
+
+    while (q.length) {
+      const curr = q[0];
+      q.shift();
+      if (visited.has(newBoard[curr.i][curr.j].id)) continue;
+      if (!(curr.i == start.i && curr.j == start.j)) {
+        if (!(curr.i == target.i && curr.j == target.j)) newBoard[curr.i][curr.j].status = Status.VISITED;
+        newBoard[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j)
+      }
+      if (curr.i == target.i && curr.j == target.j) {
+        found = true;
+        break;
+      }
+
+      visited.add(newBoard[curr.i][curr.j].id)
+      setBoard(newBoard)
+
+      for (let i = 0; i < 4; i++) {
+        if (di[i] + curr.i < 0 || di[i] + curr.i >= newBoard.length) continue;
+        if (dj[i] + curr.j < 0 || dj[i] + curr.j >= newBoard[0].length) continue;
+        if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j].id)) continue;
+        if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
+
+        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: getDistance(curr, start), h: getDistance(curr, target) })
+        q.sort((a, b) => {
+          if (a.g + a.h != b.g + b.h) return (a.g + a.h) - (b.g + b.h)
+          return a.h - b.h
+        })
+      }
+    }
+
+    if (found) {
+      let curr = newBoard[target.i][target.j]
+      while (curr.id != newBoard[start.i][start.j].id) {
+        if (!(curr.prev.i == start.i && curr.prev.j == start.j)) newBoard[curr.prev.i][curr.prev.j].status = Status.PATH
+        let prev = curr.getPath()
+        curr = newBoard[prev.i][prev.j]
+        setBoard(newBoard)
+      }
+    }
+  }
 
   const bfs = () => {
-    setState(true)
-    let newBoard = clearVisited(board)
-    let visited = new Set();
-    let q = [{ i: start.i, j: start.j }]
+    setState(Search.BFS)
     let found = false
+    const visited = new Set();
+    let newBoard = clearVisited(board)
+    const q = [{ i: start.i, j: start.j, q: 0, h: getDistance(start, target) }]
 
-    while (q.length != 0) {
+    while (q.length) {
       const curr = q[0];
       q.shift();
       if (visited.has(newBoard[curr.i][curr.j].id)) continue;
@@ -39,7 +87,7 @@ const Board = () => {
         if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j])) continue;
         if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
 
-        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j } })
+        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: getDistance(curr, start), h: getDistance(curr, target) })
       }
     }
     if (found) {
@@ -57,7 +105,7 @@ const Board = () => {
     setBoard(clearEntireBoard(board))
     setStarting(undefined)
     setTarget(undefined)
-    setState(false)
+    setState(0)
     setHolding(false)
     setDrawingMode(false)
   }
@@ -79,7 +127,8 @@ const Board = () => {
         newBoard[i][j].status = Status.UNVISITED
       }
       setBoard(newBoard)
-      if (state) bfs()
+      if (state == 1) bfs()
+      if (state == 2) astar()
       return
     }
     if (!start) {
@@ -90,14 +139,16 @@ const Board = () => {
       board[i][j].status = Status.TARGET
     }
     setBoard(board)
-    if (state) bfs()
+    if (state == 1) bfs()
+    if (state == 2) astar()
     return
   }
 
   return (
     <>
       <div className="options">
-        <button className='search' onClick={() => bfs()} disabled={!target || !target}>Search</button>
+        <button className='search' onClick={() => bfs()} disabled={!target || !target}>BFS</button>
+        <button className='search' onClick={() => astar()} disabled={!target || !target}>A*</button>
         <button className='clear' onClick={() => clearBoard()}>Clear</button>
         <button className='walls' onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
       </div>
