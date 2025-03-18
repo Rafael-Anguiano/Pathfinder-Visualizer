@@ -13,9 +13,9 @@ const Tile = ({ status, position, handleClick, handleHolding, isHolding }) => {
                   "path"
       ) + " tile"}
       onMouseDown={() => handleHolding(true, position.i, position.j)}
-      onMouseEnter={() => isHolding ? handleClick(position.i, position.j) : null}
+      onMouseEnter={() => isHolding && handleClick(position.i, position.j)}
       onMouseUp={() => handleHolding(false)}
-    ></div >
+    />
   )
 }
 

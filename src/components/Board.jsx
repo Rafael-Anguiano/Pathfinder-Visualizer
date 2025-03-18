@@ -13,10 +13,10 @@ const Board = () => {
 
   const astar = () => {
     setState(Search.ASTAR)
-    let newBoard = clearVisited(board);
-    let visited = new Set();
     let found = false
-    const q = [{ i: start.i, j: start.j, q: 0, h: getDistance(start, target) }]
+    const visited = new Set();
+    const newBoard = clearVisited(board);
+    const q = [{ i: start.i, j: start.j, g: 0, h: getDistance(start, target) }]
 
     while (q.length) {
       const curr = q[0];
@@ -40,7 +40,7 @@ const Board = () => {
         if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j].id)) continue;
         if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
 
-        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: getDistance(curr, start), h: getDistance(curr, target) })
+        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: curr.g + 1, h: getDistance(curr, target) })
         q.sort((a, b) => {
           if (a.g + a.h != b.g + b.h) return (a.g + a.h) - (b.g + b.h)
           return a.h - b.h
@@ -63,8 +63,8 @@ const Board = () => {
     setState(Search.BFS)
     let found = false
     const visited = new Set();
-    let newBoard = clearVisited(board)
-    const q = [{ i: start.i, j: start.j, q: 0, h: getDistance(start, target) }]
+    const newBoard = clearVisited(board)
+    const q = [{ i: start.i, j: start.j }]
 
     while (q.length) {
       const curr = q[0];
@@ -87,7 +87,7 @@ const Board = () => {
         if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j])) continue;
         if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
 
-        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: getDistance(curr, start), h: getDistance(curr, target) })
+        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j } })
       }
     }
     if (found) {
@@ -102,12 +102,12 @@ const Board = () => {
   }
 
   const clearBoard = () => {
-    setBoard(clearEntireBoard(board))
-    setStarting(undefined)
-    setTarget(undefined)
     setState(0)
     setHolding(false)
+    setTarget(undefined)
     setDrawingMode(false)
+    setStarting(undefined)
+    setBoard(clearEntireBoard(board))
   }
 
   const handleHolding = (value, i, j) => {
@@ -147,9 +147,9 @@ const Board = () => {
   return (
     <>
       <div className="options">
-        <button className='search' onClick={() => bfs()} disabled={!target || !target}>BFS</button>
-        <button className='search' onClick={() => astar()} disabled={!target || !target}>A*</button>
-        <button className='clear' onClick={() => clearBoard()}>Clear</button>
+        <button className='search' onClick={bfs} disabled={!start || !target}>BFS</button>
+        <button className='search' onClick={astar} disabled={!start || !target}>A*</button>
+        <button className='clear' onClick={clearBoard}>Clear</button>
         <button className='walls' onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
       </div>
       <div className="container">
