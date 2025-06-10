@@ -1,9 +1,11 @@
 import { Status } from "../constants"
 
 export default class Node {
-  constructor(id) {
+  constructor(id, status = Status.UNVISITED, row = 0, col = 0) {
     this.id = id
-    this.status = Status.UNVISITED
+    this.status = status
+    this.row = row,
+    this.column = col
   }
 
   setPrev(i, j) {

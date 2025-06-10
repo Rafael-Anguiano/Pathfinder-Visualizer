@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { clearEntireBoard, clearVisited, copyBoard, getDistance } from '../helpers/helpers.js';
-import { di, dj, base, Status, Search } from '../constants.js'
+import { di, dj, base, Status, Search, createMaze } from '../constants.js'
 import Tile from './Tile';
 
 const Board = () => {
@@ -101,6 +101,11 @@ const Board = () => {
     }
   }
 
+  const generateMaze = () => {
+    clearBoard()
+    setBoard(createMaze)
+  }
+
   const clearBoard = () => {
     setState(0)
     setHolding(false)
@@ -151,6 +156,7 @@ const Board = () => {
         <button className='search' onClick={astar} disabled={!start || !target}>A*</button>
         <button className='clear' onClick={clearBoard}>Clear</button>
         <button className='walls' onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
+        <button className='walls' onClick={generateMaze}>Create Maze</button>
       </div>
       <div className="container">
         {
