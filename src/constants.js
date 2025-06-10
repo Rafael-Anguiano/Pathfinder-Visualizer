@@ -3,8 +3,8 @@ import Node from "./helpers/NodeClass"
 export const di = [0, 1, 0, -1]
 export const dj = [1, 0, -1, 0]
 
-const rows = 21;
-const columns = 41;
+const rows = 31;
+const columns = 61;
 
 export const Status = {
   UNVISITED: 0,
@@ -38,10 +38,10 @@ export const createMazeBase = () => {
   let id = 1;
   const matrix = []
 
-  for (let i = 0; i < 21; i++) {
+  for (let i = 0; i < rows; i++) {
     matrix.push([])
     if (i % 2) {
-      for (let j = 0; j< 41; j++) {
+      for (let j = 0; j< columns; j++) {
         if (j % 2 == 0) {
           matrix[i].push(new Node(id, Status.WALL, i, j));
         } else {
@@ -63,8 +63,14 @@ export const createMazeBase = () => {
 const getUnvisitedNeightbours = (matrix, visited, curr) => {
   let posible = []
 
+
+  console.log(curr)
+  console.log(matrix)
+  console.log(visited)
   // Up
-  if (curr.row - 2 > 0 && !visited.has(matrix[curr.row - 2][curr.column].id)) {
+  try {
+
+  if (curr.row - 2 > 0 && !visited.has(matrix[curr.row - 2][curr.column]?.id)) {
     posible.push(matrix[curr.row - 2][curr.column])
   }
 
@@ -74,13 +80,17 @@ const getUnvisitedNeightbours = (matrix, visited, curr) => {
   }
 
   // Left
-  if (curr.column - 2 > 0 && !visited.has(matrix[curr.row][curr.column - 2].id)) {
+  if (curr.column - 2 > 0 && !visited.has(matrix[curr.row][curr.column - 2]?.id)) {
     posible.push(matrix[curr.row][curr.column - 2])
   }
 
   // Right
-  if (curr.column + 2 < columns - 1 && !visited.has(matrix[curr.row][curr.column + 2].id)) {
+  if (curr.column + 2 < columns - 1 && !visited.has(matrix[curr.row][curr.column + 2]?.id)) {
     posible.push(matrix[curr.row][curr.column + 2])
+  }
+  }
+  catch (err) {
+    console.log(err)
   }
 
   return posible
