@@ -1,104 +1,28 @@
 import { useState } from 'react'
-import { clearEntireBoard, clearVisited, copyBoard, getDistance } from '../helpers/helpers.js';
-import { di, dj, base, Status, Search, createMaze } from '../constants.js'
+import { 
+  astar,
+  bfs,
+  clearEntireBoard,
+  clearVisited,
+  copyBoard,
+  createMatrixOfNodes
+  createMaze,
+  getDistance,
+} from '../helpers/helpers.js';
+import { di, dj, Search, Status } from '../constants.js'
 import Tile from './Tile';
 
 const Board = () => {
-  const [board, setBoard] = useState(base)
+  const [board, setBoard] = useState(createMatrixOfNodes)
   const [state, setState] = useState(Search.NONE)
   const [target, setTarget] = useState()
   const [start, setStarting] = useState()
   const [holdingMouse, setHolding] = useState(false)
   const [isDrawing, setDrawingMode] = useState(false)
 
-  const astar = () => {
-    setState(Search.ASTAR)
-    let found = false
-    const visited = new Set();
-    const newBoard = clearVisited(board);
-    const q = [{ i: start.i, j: start.j, g: 0, h: getDistance(start, target) }]
-
-    while (q.length) {
-      const curr = q[0];
-      q.shift();
-      if (visited.has(newBoard[curr.i][curr.j].id)) continue;
-      if (!(curr.i == start.i && curr.j == start.j)) {
-        if (!(curr.i == target.i && curr.j == target.j)) newBoard[curr.i][curr.j].status = Status.VISITED;
-        newBoard[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j)
-      }
-      if (curr.i == target.i && curr.j == target.j) {
-        found = true;
-        break;
-      }
-
-      visited.add(newBoard[curr.i][curr.j].id)
-      setBoard(newBoard)
-
-      for (let i = 0; i < 4; i++) {
-        if (di[i] + curr.i < 0 || di[i] + curr.i >= newBoard.length) continue;
-        if (dj[i] + curr.j < 0 || dj[i] + curr.j >= newBoard[0].length) continue;
-        if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j].id)) continue;
-        if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
-
-        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: curr.g + 1, h: getDistance(curr, target) })
-        q.sort((a, b) => {
-          if (a.g + a.h != b.g + b.h) return (a.g + a.h) - (b.g + b.h)
-          return a.h - b.h
-        })
-      }
-    }
-
-    if (found) {
-      let curr = newBoard[target.i][target.j]
-      while (curr.id != newBoard[start.i][start.j].id) {
-        if (!(curr.prev.i == start.i && curr.prev.j == start.j)) newBoard[curr.prev.i][curr.prev.j].status = Status.PATH
-        let prev = curr.getPath()
-        curr = newBoard[prev.i][prev.j]
-        setBoard(newBoard)
-      }
-    }
-  }
-
-  const bfs = () => {
-    setState(Search.BFS)
-    let found = false
-    const visited = new Set();
-    const newBoard = clearVisited(board)
-    const q = [{ i: start.i, j: start.j }]
-
-    while (q.length) {
-      const curr = q[0];
-      q.shift();
-      if (visited.has(newBoard[curr.i][curr.j].id)) continue;
-      if (!(curr.i == start.i && curr.j == start.j)) {
-        if (!(curr.i == target.i && curr.j == target.j)) newBoard[curr.i][curr.j].status = Status.VISITED;
-        newBoard[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j)
-      }
-      if (curr.i == target.i && curr.j == target.j) {
-        found = true;
-        break;
-      }
-      visited.add(newBoard[curr.i][curr.j].id)
-      setBoard(newBoard)
-
-      for (let i = 0; i < 4; i++) {
-        if (di[i] + curr.i < 0 || di[i] + curr.i >= newBoard.length) continue;
-        if (dj[i] + curr.j < 0 || dj[i] + curr.j >= newBoard[0].length) continue;
-        if (visited.has(newBoard[di[i] + curr.i][dj[i] + curr.j])) continue;
-        if (newBoard[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
-
-        q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j } })
-      }
-    }
-    if (found) {
-      let curr = newBoard[target.i][target.j]
-      while (curr.id != newBoard[start.i][start.j].id) {
-        if (!(curr.prev.i == start.i && curr.prev.j == start.j)) newBoard[curr.prev.i][curr.prev.j].status = Status.PATH
-        let prev = curr.getPath()
-        curr = newBoard[prev.i][prev.j]
-        setBoard(newBoard)
-      }
-    }
+  const path = (status, fn) => {
+    setState(status)
+    setBoard(fn(start, target, board))
   }
 
   const generateMaze = () => {
@@ -152,8 +76,20 @@ const Board = () => {
   return (
     <>
       <div className="options">
-        <button className='search' onClick={bfs} disabled={!start || !target}>BFS</button>
-        <button className='search' onClick={astar} disabled={!start || !target}>A*</button>
+        <button 
+          className='search' 
+          onClick={() => path(Search.BFS, bfs)} 
+          disabled={!start || !target}
+        >
+          BFS
+        </button>
+        <button 
+          className='search' 
+          onClick={() => path(Search.ASTAR, astar)} 
+          disabled={!start || !target}
+        >
+          A*
+        </button>
         <button className='clear' onClick={clearBoard}>Clear</button>
         <button className='walls' onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
         <button className='walls' onClick={generateMaze}>Create Maze</button>
@@ -177,6 +113,3 @@ const Board = () => {
 }
 
 export default Board
-
-
-// backgroundGradient={'linear-gradient(90deg, #e66465, #9198e5)'}
