@@ -5,9 +5,9 @@ import {
   clearEntireBoard,
   clearVisited,
   copyBoard,
-  createMatrixOfNodes
+  createMatrixOfNodes,
   createMaze,
-  getDistance,
+  getDistance
 } from '../helpers/helpers.js';
 import { di, dj, Search, Status } from '../constants.js'
 import Tile from './Tile';
