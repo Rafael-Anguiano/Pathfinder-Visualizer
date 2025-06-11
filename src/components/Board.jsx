@@ -56,8 +56,8 @@ const Board = () => {
         newBoard[i][j].status = Status.UNVISITED
       }
       setBoard(newBoard)
-      if (state == 1) bfs()
-      if (state == 2) astar()
+      if (state == 1) path(Search.BFS, bfs)
+      if (state == 2) path(Search.ASTAR, astar)
       return
     }
     if (!start) {
@@ -68,8 +68,8 @@ const Board = () => {
       board[i][j].status = Status.TARGET
     }
     setBoard(board)
-    if (state == 1) bfs()
-    if (state == 2) astar()
+    if (state == 1) path(Search.BFS, bfs)
+    if (state == 2) path(Search.ASTAR, astar)
     return
   }
 
@@ -108,6 +108,9 @@ const Board = () => {
           ))
         }
       </div >
+      { !start && !target && <p className="options instructions"><i><strong>Click a cell to select the starting point</strong></i></p>}
+      { start && !target && <p className="options instructions"><i><strong>Click a cell to select the finish point</strong></i></p>}
+      { start && target && <p className="options instructions"><i><strong>Choose a search algorithm</strong></i></p>}
     </>
   )
 }
