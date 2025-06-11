@@ -13,7 +13,7 @@ import { di, dj, Search, Status } from '../constants.js'
 import Tile from './Tile';
 
 const Board = () => {
-  const [board, setBoard] = useState(createMatrixOfNodes)
+  const [board, setBoard] = useState(createMaze)
   const [state, setState] = useState(Search.NONE)
   const [target, setTarget] = useState()
   const [start, setStarting] = useState()
