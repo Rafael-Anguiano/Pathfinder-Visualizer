@@ -3,13 +3,10 @@ import {
   astar,
   bfs,
   clearEntireBoard,
-  clearVisited,
   copyBoard,
-  createMatrixOfNodes,
   createMaze,
-  getDistance
 } from '../helpers/helpers.js';
-import { di, dj, Search, Status } from '../constants.js'
+import { Search, Status } from '../constants.js'
 import Tile from './Tile';
 
 const Board = () => {
