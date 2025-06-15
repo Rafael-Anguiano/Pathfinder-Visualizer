@@ -3,6 +3,7 @@ export const dj = [1, 0, -1, 0]
 
 export const rows = 31;
 export const columns = 61;
+export const animationSpeed = 15;
 
 export const Status = {
   UNVISITED: 0,

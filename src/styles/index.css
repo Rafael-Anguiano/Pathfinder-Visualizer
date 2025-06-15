@@ -26,6 +26,12 @@
   gap: 1rem;
 }
 
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .instructions {
   font-size: 1.1rem;
 }
@@ -47,7 +53,7 @@ button {
   width: 5rem;
 }
 
-.search:disabled {
+button:disabled {
   background: gray;
 }
 

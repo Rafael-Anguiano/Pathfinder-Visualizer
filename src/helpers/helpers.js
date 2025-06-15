@@ -1,4 +1,4 @@
-import { Status, rows, columns, di, dj } from "../constants";
+import { Status, Search, rows, columns, di, dj, animationSpeed } from "../constants";
 import Node from "./NodeClass"
 import PriorityQueue from "./PriorityQueue"
 
@@ -24,7 +24,6 @@ export const copyBoard = (board) => {
       newMatrix[i].push(board[i][j])
     }
   }
-
   return newMatrix
 }
 
@@ -140,27 +139,33 @@ export const createMaze = () => {
 }
 
 // SEARCH ALGORITHMS
-export const bfs = (start, target, matrix) => {
-  let found = false
+export const bfs = (start, target, matrix, setBoard, setState) => {
+  let found = false;
   const visited = new Set();
-  const board = clearVisited(matrix)
-  const q = [{ i: start.i, j: start.j }]
+  const board = clearVisited(matrix);
+  const q = [{ i: start.i, j: start.j }];
+  const visitedCells = [];
+  const pathCells = [];
+  let curr
 
   while (q.length) {
-    const curr = q[0];
-    q.shift();
+    curr = q.shift();
 
     if (visited.has(board[curr.i][curr.j].id)) continue;
+
     if (!(curr.i == start.i && curr.j == start.j)) {
-      if (!(curr.i == target.i && curr.j == target.j)) board[curr.i][curr.j].status = Status.VISITED;
-      board[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j)
+      if (!(curr.i == target.i && curr.j == target.j)) {
+        visitedCells.push({ i: curr.i, j: curr.j });
+      }
+      board[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j);
     }
+
     if (curr.i == target.i && curr.j == target.j) {
       found = true;
       break;
     }
 
-    visited.add(board[curr.i][curr.j].id)
+    visited.add(board[curr.i][curr.j].id);
 
     for (let i = 0; i < 4; i++) {
       if (di[i] + curr.i < 0 || di[i] + curr.i >= board.length) continue;
@@ -168,59 +173,112 @@ export const bfs = (start, target, matrix) => {
       if (visited.has(board[di[i] + curr.i][dj[i] + curr.j])) continue;
       if (board[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
 
-      q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j } })
+      q.push({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j } });
     }
   }
+
   if (found) {
-    let curr = board[target.i][target.j]
+    curr = board[target.i][target.j];
     while (curr.id != board[start.i][start.j].id) {
-      if (!(curr.prev.i == start.i && curr.prev.j == start.j)) board[curr.prev.i][curr.prev.j].status = Status.PATH
-      let prev = curr.getPath()
-      curr = board[prev.i][prev.j]
+      if (!(curr.prev.i == start.i && curr.prev.j == start.j)) {
+        pathCells.unshift({ i: curr.prev.i, j: curr.prev.j });
+      }
+      let prev = curr.getPath();
+      curr = board[prev.i][prev.j];
     }
   }
-  return board
+
+  // Animate the visited cells
+  animateSearch(board, visitedCells, pathCells, setBoard, setState);
+  
+  return board;
 }
 
-export const astar = (start, target, matrix) => {
-    let found = false
-    const visited = new Set();
-    const board = clearVisited(matrix);
-    const q = new PriorityQueue();
-    q.addNode({ i: start.i, j: start.j, g: 0, h: getDistance(start, target) })
+export const astar = (start, target, matrix, setBoard, setState) => {
+  let found = false;
+  const visited = new Set();
+  const board = clearVisited(matrix);
+  const q = new PriorityQueue();
+  q.addNode({ i: start.i, j: start.j, g: 0, h: getDistance(start, target) });
+  const visitedCells = [];
+  const pathCells = [];
 
-    while (q.length) {
-      const curr = q.top();
-      if (visited.has(board[curr.i][curr.j].id)) continue;
-      if (!(curr.i == start.i && curr.j == start.j)) {
-        if (!(curr.i == target.i && curr.j == target.j)) board[curr.i][curr.j].status = Status.VISITED;
-        board[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j)
+  while (q.length) {
+    const curr = q.top();
+    if (visited.has(board[curr.i][curr.j].id)) continue;
+
+    if (!(curr.i == start.i && curr.j == start.j)) {
+      if (!(curr.i == target.i && curr.j == target.j)) {
+        visitedCells.push({ i: curr.i, j: curr.j });
       }
-      if (curr.i == target.i && curr.j == target.j) {
-        found = true;
-        break;
-      }
-
-      visited.add(board[curr.i][curr.j].id)
-
-      for (let i = 0; i < 4; i++) {
-        if (di[i] + curr.i < 0 || di[i] + curr.i >= board.length) continue;
-        if (dj[i] + curr.j < 0 || dj[i] + curr.j >= board[0].length) continue;
-        if (visited.has(board[di[i] + curr.i][dj[i] + curr.j].id)) continue;
-        if (board[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
-
-        q.addNode({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: curr.g + 1, h: getDistance(curr, target) })
-      }
+      board[curr.i][curr.j].setPrev(curr.prev.i, curr.prev.j);
     }
 
-    if (found) {
-      let curr = board[target.i][target.j]
-      while (curr.id != board[start.i][start.j].id) {
-        if (!(curr.prev.i == start.i && curr.prev.j == start.j)) board[curr.prev.i][curr.prev.j].status = Status.PATH
-        let prev = curr.getPath()
-        curr = board[prev.i][prev.j]
-      }
+    if (curr.i == target.i && curr.j == target.j) {
+      found = true;
+      break;
     }
-  return board
+
+    visited.add(board[curr.i][curr.j].id);
+
+    for (let i = 0; i < 4; i++) {
+      if (di[i] + curr.i < 0 || di[i] + curr.i >= board.length) continue;
+      if (dj[i] + curr.j < 0 || dj[i] + curr.j >= board[0].length) continue;
+      if (visited.has(board[di[i] + curr.i][dj[i] + curr.j].id)) continue;
+      if (board[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
+
+      q.addNode({ i: di[i] + curr.i, j: dj[i] + curr.j, prev: { i: curr.i, j: curr.j }, g: curr.g + 1, h: getDistance(curr, target) });
+    }
+  }
+
+  if (found) {
+    let curr = board[target.i][target.j];
+    while (curr.id != board[start.i][start.j].id) {
+      if (!(curr.prev.i == start.i && curr.prev.j == start.j)) {
+        pathCells.unshift({ i: curr.prev.i, j: curr.prev.j });
+      }
+      let prev = curr.getPath();
+      curr = board[prev.i][prev.j];
+    }
+  }
+
+  animateSearch(board, visitedCells, pathCells, setBoard, setState);
+
+  return board;
 }
 
+// ANIMATION
+const animateSearch = (board, visitedCells, pathCells, setBoard, setState) => {
+  // First animate the visited cells
+  for (let i = 0; i < visitedCells.length; i++) {
+    setTimeout(() => {
+      const newBoard = copyBoard(board);
+      const cell = visitedCells[i];
+      newBoard[cell.i][cell.j].status = Status.VISITED;
+      setBoard(newBoard);
+      
+      // After all visited cells are animated, animate the path
+      if (i === visitedCells.length - 1) {
+        if (!pathCells.length) {
+          setState(Search.NONE)
+        } else {
+          animatePath(board, pathCells, setBoard, setState);
+        }
+      }
+    }, i * animationSpeed);
+  }
+}
+
+const animatePath = (board, pathCells, setBoard, setState) => {
+  for (let i = 0; i < pathCells.length; i++) {
+    setTimeout(() => {
+      const newBoard = copyBoard(board);
+      const cell = pathCells[i];
+      newBoard[cell.i][cell.j].status = Status.PATH;
+      setBoard(newBoard);
+      if (i === pathCells.length - 1 ) {
+        setState(Search.NONE)
+      }
+    }, i * animationSpeed);
+  }
+}

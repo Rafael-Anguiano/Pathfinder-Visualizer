@@ -3,6 +3,7 @@ import {
   astar,
   bfs,
   clearEntireBoard,
+  clearVisited,
   copyBoard,
   createMaze,
 } from '../helpers/helpers.js';
@@ -19,7 +20,8 @@ const Board = () => {
 
   const path = (status, fn) => {
     setState(status)
-    setBoard(fn(start, target, board))
+    setBoard(clearVisited(board))
+    fn(start, target, board, setBoard, setState)
   }
 
   const generateMaze = () => {
@@ -42,6 +44,7 @@ const Board = () => {
   }
 
   const handleClick = (i, j) => {
+    if (state) return;
     if (isDrawing) {
       if (start && i == start.i && j == start.j) return;
       if (target && i == target.i && j == target.j) return;
@@ -76,20 +79,20 @@ const Board = () => {
         <button 
           className='search' 
           onClick={() => path(Search.BFS, bfs)} 
-          disabled={!start || !target}
+          disabled={!start || !target || state}
         >
           BFS
         </button>
         <button 
           className='search' 
           onClick={() => path(Search.ASTAR, astar)} 
-          disabled={!start || !target}
+          disabled={!start || !target || state}
         >
           A*
         </button>
-        <button className='clear' onClick={clearBoard}>Clear</button>
-        <button className='walls' onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
-        <button className='walls' onClick={generateMaze}>Create Maze</button>
+        <button className='clear' disabled={state} onClick={clearBoard}>Clear</button>
+        <button className='walls' disabled={state} onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>
+        <button className='walls' disabled={state} onClick={generateMaze}>Create Maze</button>
       </div>
       <div className="container">
         {

@@ -18,11 +18,7 @@
 
 .visited {
   background: #007bffaa;
-}
-
-@keyframes unvisited-visited {
-  from {background-color: white;}
-  to {background-color: blue;}
+  animation: path-animation 0.5s ease-out forwards;
 }
 
 .wall {
@@ -31,11 +27,14 @@
 
 .path {
   background: #ffc107;
+  animation: path-animation 0.5s ease-out forwards;
 }
 
-
-@keyframes visited-path {
-  from {background-color: white;}
-  50% {background-color: blue;}
-  to {background-color: green;}
+@keyframes path-animation {
+  0% {
+    clip-path: circle(0% at center);
+  }
+  100% {
+    clip-path: circle(100% at center);
+  }
 }
