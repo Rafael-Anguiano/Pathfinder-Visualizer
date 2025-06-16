@@ -18,5 +18,6 @@ export const Search = {
   NONE: 0,
   BFS: 1,
   ASTAR: 2,
+  DFS: 3,
 }
 

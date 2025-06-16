@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { 
   astar,
   bfs,
+  dfs,
   clearEntireBoard,
   clearVisited,
   copyBoard,
@@ -58,6 +59,7 @@ const Board = () => {
       setBoard(newBoard)
       if (state == 1) path(Search.BFS, bfs)
       if (state == 2) path(Search.ASTAR, astar)
+      if (state == 3) path(Search.DFS, dfs)
       return
     }
     if (!start) {
@@ -70,6 +72,7 @@ const Board = () => {
     setBoard(board)
     if (state == 1) path(Search.BFS, bfs)
     if (state == 2) path(Search.ASTAR, astar)
+    if (state == 3) path(Search.DFS, dfs)
     return
   }
 
@@ -89,6 +92,13 @@ const Board = () => {
           disabled={!start || !target || state}
         >
           A*
+        </button>
+        <button 
+          className='search' 
+          onClick={() => path(Search.DFS, dfs)} 
+          disabled={!start || !target || state}
+        >
+          DFS
         </button>
         <button className='clear' disabled={state} onClick={clearBoard}>Clear</button>
         <button className='walls' disabled={state} onClick={() => setDrawingMode(!isDrawing)}>{isDrawing ? "Stop Drawing" : "Draw Walls"}</button>

@@ -247,6 +247,53 @@ export const astar = (start, target, matrix, setBoard, setState) => {
   return board;
 }
 
+export const dfs = (start, target, matrix, setBoard, setState) => {
+  const board = clearVisited(matrix);
+  const stack = [{i: start.i, j: start.j}]
+  const visited = new Set([ board[start.i][start.j].id ])
+  const visitedCells = []
+  const pathCells = []
+  let found = false;
+
+  while (stack.length) {
+    const curr = stack.pop()
+
+    if (curr.i == target.i && curr.j == target.j) {
+      found = true;
+      break;
+    }
+
+    if (curr.i != start.i || curr.j != start.j) visitedCells.push({i: curr.i, j: curr.j})
+    visited.add(board[curr.i][curr.j].id)
+
+    for (let i = 0; i < 4; i++) {
+      if (di[i] + curr.i < 0 || di[i] + curr.i >= board.length) continue;
+      if (dj[i] + curr.j < 0 || dj[i] + curr.j >= board[0].length) continue;
+      if (visited.has(board[di[i] + curr.i][dj[i] + curr.j].id)) continue;
+      if (board[di[i] + curr.i][dj[i] + curr.j].status == Status.WALL) continue;
+
+      stack.push({ i: di[i] + curr.i, j: dj[i] + curr.j})
+      board[di[i] + curr.i][dj[i] + curr.j].setPrev(curr.i, curr.j)
+    }
+  }
+
+  if (found) {
+    let curr = board[target.i][target.j];
+    while (curr.id != board[start.i][start.j].id) {
+      if (!(curr.prev.i == start.i && curr.prev.j == start.j)) {
+        pathCells.unshift({ i: curr.prev.i, j: curr.prev.j });
+      }
+      let prev = curr.getPath();
+      curr = board[prev.i][prev.j];
+    }
+  }
+
+
+  animateSearch(board, visitedCells, pathCells, setBoard, setState);
+
+  return board;
+}
+
 // ANIMATION
 const animateSearch = (board, visitedCells, pathCells, setBoard, setState) => {
   // First animate the visited cells
